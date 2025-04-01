@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  php-apache-new:  # Nouveau nom ici
+    build: .
+    container_name: php-apache-new
+    restart: always
+    ports:
+      - "${PORT:-0}:80"
+    volumes:
+      - .:/var/www/html/
+    networks:
+      - app-network
+
+  db:
+    image: mariadb:10.5  # MariaDB compatible avec ARM64 (M1/M2)
+    container_name: mariadb-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: my_database
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    platform: linux/amd64  # Forcer l’architecture compatible
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8083:80"  # PHPMyAdmin sur le port 8083
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: rootpassword
+    networks:
+      - app-network
+
+volumes:
+  db-data:
+
+networks:
+  app-network:
